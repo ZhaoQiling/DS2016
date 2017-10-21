@@ -20,12 +20,28 @@ ElementType Pop( Deque D );
 int Inject( ElementType X, Deque D );
 ElementType Eject( Deque D );
 
-// Operation GetOp();          /* details omitted */
-// void PrintDeque( Deque D ); /* details omitted */
-int  GetOp(){
-    int val;
-    scanf("%d", &val);
-    return val;
+Operation GetOp();          /* details omitted */
+void PrintDeque( Deque D ); /* details omitted */
+Operation GetOp(){
+    char ch[20];
+    scanf("%s", ch);
+    if(ch[0] == 'P' && ch[1] == 'u')
+        return push;
+    if(ch[0] == 'P' && ch[1] == 'o')
+        return pop;
+    if(ch[0] == 'I' && ch[1] == 'n')
+        return inject;
+    if(ch[0] == 'E' && ch[1] == 'j')
+        return eject;
+    if(ch[0] == 'E' && ch[1] == 'n')
+        return end;
+}
+void PrintDeque( Deque D ){
+    PtrToNode pCur = D->Front->Next;
+    while(pCur != NULL){
+        printf("%d ", pCur->Element);
+        pCur = pCur->Next;
+    }
 }
 int main()
 {
@@ -53,7 +69,7 @@ int main()
             if ( X==ERROR ) printf("Deque is Empty!\n");
             break;
         case end:
-            // PrintDeque(D);
+            PrintDeque(D);
             done = 1;
             break;
         }
@@ -61,81 +77,62 @@ int main()
     return 0;
 }
 Deque CreateDeque(){
-    Deque ret = malloc(sizeof(struct DequeRecord));
-    ret->Front = ret->Rear = NULL;
+    Deque ret = (Deque)malloc(sizeof(struct DequeRecord));
+    PtrToNode node = (PtrToNode)malloc(sizeof(struct Node));
+    node->Last = node->Next  = NULL;
+    ret->Front = ret->Rear = node;
     return ret;
 }
 int Push( ElementType X, Deque D ){
-    if(D == NULL)
+    PtrToNode pTemp = (PtrToNode)malloc(sizeof(struct Node));
+    if(!pTemp)
         return 0;
-    PtrToNode pTemp = (PtrToNode) malloc(sizeof(struct Node));
     pTemp->Element = X;
-    pTemp->Next = pTemp->Last = NULL;
+    pTemp->Last = pTemp->Next = NULL;
 
-    if(D->Front == NULL && D->Rear == NULL){
-        D->Front = D->Rear = pTemp;
-        return 1;
-    }
-    PtrToNode pSave = D->Front;
-    D->Front = pTemp;
-    pTemp->Next = pSave;
-    pSave->Last = pTemp;
-
+    pTemp->Next = D->Front->Next;
+    pTemp->Last = D->Front;
+    D->Front->Next = pTemp;
+    if(pTemp->Next != NULL)
+        pTemp->Next->Last = pTemp;
+    else
+        D->Rear = pTemp;
     return 1;
 }
 ElementType Pop( Deque D ){
-    if(D == NULL)
+    if(D->Front == D->Rear)
         return ERROR;
-    if(D->Front == NULL && D->Rear == NULL)
-        return ERROR;
-    if(D->Front == D->Rear){
-        ElementType ret = D->Front->Element;
-        free(D->Front);
-        D->Front = D->Rear = NULL;
-        return ret;
-    }
-    PtrToNode pSave = D->Front;
+    PtrToNode pSave = D->Front->Next;
     ElementType ret = pSave->Element;
-    D->Front = pSave->Next;
-    pSave->Next->Last = NULL;
+    D->Front->Next = pSave->Next;
+    if(pSave->Next == NULL){
+        D->Rear = D->Front;
+    }
+    else{
+        pSave->Next->Last = D->Front;
+    }
     free(pSave);
     return ret;
 }
 int Inject( ElementType X, Deque D ){
-    if(D == NULL)
-        return 0;
     PtrToNode pTemp = (PtrToNode) malloc(sizeof(struct Node));
+    if(!pTemp)
+        return 0;
     pTemp->Element = X;
-    pTemp->Next = pTemp->Last = NULL;
+    pTemp->Last = pTemp->Next = NULL;
 
-    if(D->Front == NULL && D->Rear == NULL){
-        D->Front = D->Rear = pTemp;
-        return 1;
-    }
-
-    PtrToNode pSave = D->Rear;
-    pSave->Next = pTemp;
-    pTemp->Last = pSave;
+    pTemp->Last = D->Rear;
+    D->Rear->Next = pTemp;
     D->Rear = pTemp;
     return 1;
 }
 ElementType Eject( Deque D ){
-    if(D == NULL)
+    if(D->Front == D->Rear)
         return ERROR;
-    if(D->Front == NULL && D->Rear == NULL)
-        return ERROR;
-    if(D->Front == D->Rear){
-        ElementType ret = D->Front->Element;
-        free(D->Front);
-        D->Front = D->Rear = NULL;
-        return ret;
-    }
-
     PtrToNode pSave = D->Rear;
     ElementType ret = pSave->Element;
     D->Rear = pSave->Last;
     pSave->Last->Next = NULL;
     free(pSave);
     return ret;
-
 }
