@@ -2,57 +2,62 @@
 #include <stdlib.h>
 typedef struct Node Node;
 struct Node{
-    long long  key;
-    int count;
-    Node* pNext;
+    long long key;
+    int cnt;
+    Node *leftChild, *rightChild;
 };
-int maxAns = 1;
-int para = 0;
-Node* pHead;
-void insertNode(long long val){
-    Node* pCur = pHead;
-    while(pCur->pNext != NULL){
-        if(pCur->pNext->key == val){
-            pCur->pNext->count++;
-            if(pCur->pNext->count > maxAns){
-                maxAns = pCur->pNext->count;
-            }
-            return;
-        }
-        if(val < pCur->pNext->key)
-            break;
-        pCur = pCur->pNext;
+Node* createNode(long long key){
+    Node* ret = (Node*) malloc(sizeof(Node));
+    ret->key = key;
+    ret->cnt = 1;
+    ret->leftChild = ret->rightChild = NULL;
+    return ret;
+}
+int maxAns = 0;
+Node* insertNode(Node* root, long long key){
+    if(!root)
+        return createNode(key);
+    // printf("\n------%lld------\n", root->key);
+    if(key < root->key)
+        root->leftChild = insertNode(root->leftChild, key);
+    else if(key > root->key)
+        root->rightChild = insertNode(root->rightChild, key);
+    else if(key == root->key){
+        root->cnt++;
+        if(root->cnt > maxAns)
+            maxAns = root->cnt;
     }
-    Node* pTemp = (Node*) malloc(sizeof(Node));
-    pTemp->key = val; pTemp->pNext = NULL; pTemp->count = 1;
-    pTemp->pNext = pCur->pNext;
-    pCur->pNext = pTemp;
+    return root;
+}
+long long minTeleNum = -1;
+int nSame = 0;
+void inOrder(Node* root){
+    if(!root)
+        return;
+    inOrder(root->leftChild);
+    if(root->cnt == maxAns){
+        if(root->cnt == maxAns)
+            nSame++;
+        if(minTeleNum == -1)
+            minTeleNum = root->key;
+    }
+    inOrder(root->rightChild);
 }
 int main(){
-    pHead = (Node*) malloc(sizeof(Node));
-    pHead->pNext = NULL;
-    int nPair;
-    scanf("%d", &nPair);
-    long long record;
-    for(int i = 0; i < nPair; i++){
-        scanf("%lld", &record);
-        insertNode(record);
-        scanf("%lld", &record);
-        insertNode(record);
+    Node* root = NULL;
+    int nRecord;
+    scanf("%d", &nRecord);
+    while(nRecord--){
+        long long key;
+        scanf("%lld", &key);
+        root = insertNode(root, key);
+        scanf("%lld", &key);
+        root = insertNode(root, key);
     }
-    Node* pCur = pHead->pNext;
-    int flag = 0;
-    while(pCur != NULL){
-        if(pCur->count == maxAns && flag == 1)
-            para++;
-        if(pCur->count == maxAns && flag == 0){
-            printf("%lld %d", pCur->key, pCur->count);
-            flag = 1; para = 1;
-        }
-        pCur = pCur->pNext;
-    }
-    // printf("maxAns is %d\n", maxAns);
-    if(para != 1)
-        printf(" %d", para);
+    // printf("%d", maxAns);
+    inOrder(root);
+    printf("%lld %d", minTeleNum, maxAns);
+    if(nSame != 1)
+        printf(" %d", nSame);
     return 0;
 }
