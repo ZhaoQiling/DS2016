@@ -81,5 +81,32 @@ int main()
 }
 
 bool TopSort( LGraph Graph, Vertex TopOrder[] ){
-    
+    int inDegree[MaxVertexNum + 10];
+    for(int i = 0; i < Graph->Nv; i++)
+        inDegree[i] = 0;
+    for(int i = 0; i < Graph->Nv; i++){
+        int cnt = 0;
+        PtrToAdjVNode pCur = Graph->G[i].FirstEdge;
+        for(; pCur != NULL; pCur = pCur->Next){cnt++};
+        inDegree[i]++;
+    }
+    int que[500];
+    for(int i = 0; i < 500; i++)
+        que[i] = 0;
+    int head, tail;
+    head = tail = 0;
+    for(int i = 0; i < Graph->Nv; i++){
+        if(inDegree[i] == 0){
+            que[tail++] == i;
+            break;
+        }
+    }
+    while(head < tail){
+        Vertex front = que[head++];
+        PtrToAdjVNode pCur = Graph->G[i].FirstEdge;
+        while(pCur != NULL){
+            
+            pCur->Next;
+        }
+    }
 }
