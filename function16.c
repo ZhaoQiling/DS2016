@@ -68,8 +68,8 @@ int main()
     int i;
     Vertex TopOrder[MaxVertexNum];
     LGraph G = ReadG();
-    OutputG(G);
-    printf("\n\n");
+    // OutputG(G);
+    // printf("\n\n");
     if ( TopSort(G, TopOrder)==true )
         for ( i=0; i<G->Nv; i++ )
             printf("%d ", TopOrder[i]);
@@ -81,32 +81,43 @@ int main()
 }
 
 bool TopSort( LGraph Graph, Vertex TopOrder[] ){
-    int inDegree[MaxVertexNum + 10];
-    for(int i = 0; i < Graph->Nv; i++)
-        inDegree[i] = 0;
+    int ansCur = 0;
+    int inDegree[Graph->Nv + 10];
     for(int i = 0; i < Graph->Nv; i++){
-        int cnt = 0;
-        PtrToAdjVNode pCur = Graph->G[i].FirstEdge;
-        for(; pCur != NULL; pCur = pCur->Next){cnt++};
-        inDegree[i]++;
+        inDegree[i] = 0;
     }
-    int que[500];
-    for(int i = 0; i < 500; i++)
-        que[i] = 0;
-    int head, tail;
-    head = tail = 0;
+    for(int i = 0; i < Graph->Nv; i++){
+        PtrToAdjVNode pCur = Graph->G[i].FirstEdge;
+        for(; pCur != NULL; pCur = pCur->Next){
+            inDegree[pCur->AdjV]++;
+        }
+    }
+    int que[MaxVertexNum + 10];
+
+    int head = 0;
+    int tail = 0;
     for(int i = 0; i < Graph->Nv; i++){
         if(inDegree[i] == 0){
-            que[tail++] == i;
+            que[tail++] = i;
             break;
         }
     }
+
     while(head < tail){
         Vertex front = que[head++];
-        PtrToAdjVNode pCur = Graph->G[i].FirstEdge;
+        // printf("%d ", front);
+        TopOrder[ansCur++] = front;
+
+        PtrToAdjVNode pCur = Graph->G[front].FirstEdge;
         while(pCur != NULL){
-            
-            pCur->Next;
+            inDegree[pCur->AdjV]--;
+            if(inDegree[pCur->AdjV] == 0){
+                que[tail++] = pCur->AdjV;
+            }
+            pCur = pCur->Next;
         }
     }
+    if(ansCur != Graph->Nv)
+        return false;
+    return true;
 }
