@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define ARRSIZE 110
+typedef struct Vertex Vertex;
+struct Vertex{
+    int v1, v2;
+    int cost;
+    int isConnect;
+};
+Vertex edge[10000];
+int nVertex;
+int type[ARRSIZE];
+void init(){
+    for(int i = 1; i <= nVertex; i++)
+        type[i] = i;
+}
+int getType(int a){
+    if(a == type[a])
+        return a;
+    type[a] = getType(type[a]);
+    return type[a];
+}
+void merge(int a, int b){
+    a = getType(a);
+    b = getType(b);
+    if(a == b) return;
+    else if(a < b) type[b] = a;
+    else type[a] = b;
+}
+int cmp(const void* pa, const void* pb){
+    const Vertex* a = (const Vertex* ) pa;
+    const Vertex* b = (const Vertex* ) pb;
+    return (a->cost - b->cost);
+}
+int main(){
+    scanf("%d", &nVertex);
+    init();
+    int nEdge = nVertex * (nVertex - 1) / 2;
+    // printf("nEdge is %d\n", nEdge);
+
+
+    for(int i = 0; i < nEdge; i++)
+    {
+        int a, b, c, d;
+        scanf("%d%d%d%d", &a, &b, &c, &d);
+        edge[i].v1 = a; edge[i].v2 = b;
+        edge[i].cost = c;
+        edge[i].isConnect = d;
+        // printf("i is %d\n", i);
+        // printf("a is %d b is %d c is %d d is %d ", a, b, c, d);
+        if(d)
+            merge(a, b);
+    }
+
+    // for(int i = 1; i <= nVertex; i++)
+    //     printf("%d ", type[i]);
+
+    qsort(edge, nEdge, sizeof(Vertex), cmp);
+    int sum = 0;
+    for(int i = 0; i < nEdge; i++){
+        if(edge[i].isConnect)
+            continue;
+        if(type[edge[i].v1] == type[edge[i].v2])
+            continue;
+
+        merge(edge[i].v1, edge[i].v2);
+        for(int j = 1; j <= nVertex; j++)
+            type[j] = getType(type[j]);
+        sum += edge[i].cost;
+    }
+    printf("%d", sum);
+    return 0;
+}
